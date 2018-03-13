@@ -5,7 +5,7 @@
     set MyPath=%~dp0
 
 :checkenvironment
-    echo ==== ==== ==== ==== Checking Building Environment...
+    echo ==== ==== ==== ==== Checking building environment...
     perl -h >nul 2>nul
     if not %errorlevel%==0 (
         echo !!!! Need ActivePerl, Please install it !!!!
@@ -32,9 +32,8 @@
     set GPATH=%MyPath%\\%PLAT%
 
 :start
-    echo ==== ==== ==== ==== Start compiling %PLAT%...
-
     echo ==== ==== ==== ==== Prepare environment(%PLAT%)...
+
     cd /d %VCPATH%
     if "%1" == "" (
         call vcvarsall.bat amd64 >nul
@@ -47,36 +46,48 @@
     cd /d %VPATH%
 
 :configure
+    echo ==== ==== ==== ==== Configure(%PLAT%)...
+
     perl Configure %PlatCfg% shared no-asm no-shared
 
 :libs
     echo ==== ==== ==== ==== Building(%PLAT%)...
+
     nmake build_libs
 
 :copylibs
-    echo ==== ==== ==== ==== Copy libs...
-    if not exist "%GPATH%" mkdir %GPATH%
-    del /q "%GPATH%\\*.*"
+    echo ==== ==== ==== ==== Prepare dest folder(%PLAT%)...
 
-    copy libcrypto.lib "%GPATH%"
-    copy libssl.lib "%GPATH%"
+    rd /S /Q "%GPATH%" >nul
+    if exist "%GPATH%" goto fail
+    mkdir "%GPATH%" >nul
+
+    echo ==== ==== ==== ==== Copy libs(%PLAT%)...
+
+    copy libcrypto.lib  "%GPATH%"
+    copy libssl.lib     "%GPATH%"
 
 :makeinclude
     set IncludePath=%MyPath%\\include
     if "%1" == "" (
-        echo ==== ==== ==== ==== Prepare Include Folder and Files...
-        rd /S /Q "%IncludePath%"
-        mkdir "%IncludePath%\\openssl"
-        copy "%VPATH%\\include\openssl\*.h" "%IncludePath%\\openssl"
+        echo ==== ==== ==== ==== Prepare include folder and files...
+
+        rd /S /Q "%IncludePath%" >nul
+        if exist "%IncludePath%" goto fail
+        mkdir "%IncludePath%\\openssl" >nul
+
+        copy "%VPATH%\\include\openssl\*.h" "%IncludePath%\\openssl" >nul
+
+        echo.
     )
 
 :clean
-    echo ==== ==== ==== ==== Clean...
+    echo ==== ==== ==== ==== Clean(%PLAT%)...
+
     nmake clean
 
 :done
     echo.
-
     endlocal
 
     if "%1" == "" (
@@ -86,6 +97,11 @@
     )
 
     echo done.
+    goto end
+
+:fail
+    echo !!!!!!!!Fail!!!!!!!!
+    goto end
 
 :end
     pause >nul
