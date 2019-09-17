@@ -21,7 +21,7 @@
     )
 
 ::baseconfig
-    set VCPATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build
+    set VCPATH=D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
     set MyPath=%CD%
 
     for /d %%P in (.) do set ProjectName=%%~nP
@@ -96,7 +96,7 @@
         
         cd /d "%VCPath%"
         if "%PLAT%"=="x64" (
-            call vcvarsall.bat amd64 >nul
+            call vcvarsall.bat x64 >nul
         ) else (
             call vcvarsall.bat x86 >nul
         )
